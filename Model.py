@@ -21,10 +21,47 @@ if int(building_stock)>2008: run_label+='_BLD'+str(building_stock)
 
 
 # 95633 is a adventure park and there is no correspondence with the population map, it is skipped in profiles    
-m_error=7. #1.25  #15.  
-for com in [i for i in pop.keys() if i<>95633]: sample[com]=0; tot=np.sum(pop[com]); curr_dep=int(int(com)/1000.); X=0.9604/((m_error/100.)**2); sample[com]=np.rint(tot*X/(X+tot-1.)); pop_per_reg[cor[curr_dep]]+=sample[com]
+nb_individuals=250000
+
+out_dir=path_for_output+'/ind_'+str(nb_individuals)+'_'+run_label
+conc_dir=join('domains/'+dom+'/conc/',chim_label)
+samp_dir='samples/ind_'+str(nb_individuals)+'_'+label
+
+if not isfile(samp_dir+'/profiles.dat'):
+
+   popReal=np.sum(pop.values())
+   pop_pc=[]
+   tmp=sorted(pop.keys())
+
+   for c in tmp :
+      pop_pc.append(np.sum(pop[c])/popReal)
+      sample[c]=0
+
+   printout=10000;cnt=0
+   for ind in range(nb_individuals):
+      if ind == printout:
+          print str(printout) +' out of ' +str(nb_individuals)
+          printout +=10000
+      id_selection=profiles.selection(pop_pc,0)
+      if id_selection > len(tmp) :print cnt,id_selection ; cnt+=1
+      c=tmp[id_selection]
+      sample[c] +=1
+      curr_dep=int(int(c)/1000.)
+      pop_per_reg[cor[curr_dep]]+=1
+
+else:
+   for c in pop.keys():
+       sample[c]=0
+   pp=cPickle.load(open(samp_dir+'/profiles.dat','r'))
+   for ind in pp.keys():
+       c=pp[ind][0]
+       curr_dep=int(int(c)/1000.)
+       sample[c]+=1
+       pop_per_reg[cor[curr_dep]]+=1
+
+
                                           
-nb_individuals=int(np.sum(sample.values())); print ''; print 'executing model for label: '+run_label; print ''; print 'label for pre-exposure data (profiles/diaries): '+label; print ''
+print ''; print 'executing model for label: '+run_label; print ''; print 'label for pre-exposure data (profiles/diaries): '+label; print ''
 print 'your sample has been calculated to '+str(nb_individuals)+' individuals'; print ''; print 'your simulation will use the building stock database of the year '+str(building_stock); print ''
 print 'your simulation will use the I/O database of the year '+str(conc_period); print ''; print 'your sample consists of:'
 print 'Paris:',str(round(100.*pop_per_reg[0]/nb_individuals,1))+'%','(18.6%)'; print 'Petit Couronne',str(round(100.*pop_per_reg[1]/nb_individuals,1))+'%','(37.3%)'
@@ -54,7 +91,6 @@ elif allow_steps_prf==1:
    print 'generating personal profiles for your individuals...'; print ''
    raw_data = [f for f in listdir(getcwd()+'/data') if isfile(join(getcwd()+'/data',f))]
    
-   #!!!!!!!!!!!!!!!!!!!!!!!!COMMENTED BY MVAL because missing BUILDING_AGE file!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    data_AGEB=read_data.read_age_build()
    
    for index_f,f in enumerate([fl for fl in raw_data if fl[len(fl)-3:len(fl)]=='xls' and fl[0:3]=='BTX']):  
