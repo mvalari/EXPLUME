@@ -72,7 +72,7 @@ def exposure(conc_dir,out_dir,samp_dir,dom,period_exp,procc,idf_cells,building_s
                     if put[3] in [1,4,6,7]: BT=build_type[put[3]]; ageB=pp[k][ageB_type[BT]]-1; put[9]=BT; put[10]=ageB
                                 
                     for indx,i in enumerate([0,1,2,3,5,8,9,10]): input[w,k,h,a,indx]=put[i]     
-                    for indx,i in enumerate(map(float,read_IO.split('/'))): input[w,k,h,a,7+indx]=i # put the I/O ratios for transport
+                    for indx,i in enumerate(map(float,read_IO.split('/'))): input[w,k,h,a,8+indx]=i # put the I/O ratios for transport
         
     if chimere_exp==1: input[:,:,:,:,8:]=1. # IO ratios are set to 1 for buildings and transport
         
@@ -311,7 +311,7 @@ def calc_exp(input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,
                     if case in [1,4,6,7]:                                                                                                                                                          
                        for index_pol in range(2): id=selection(IO_seas[curr_dep][index_pol,s,BT,ageB].tolist(),0); IO.append((float(id)*0.05+0.025))
                                               
-                    else: IO=tm[k,h,a,6:10] # transport I/Os
+                    else: IO=tm[k,h,a,8:12] # transport I/Os
                                                                
                     for index_pol,pol in enumerate('O3 PM25'.split()):
                                                 
