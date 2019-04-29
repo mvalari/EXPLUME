@@ -320,16 +320,25 @@ def calc_exp(input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,
                            elif cc in paris_cells: j=1 # the cell is inside Paris                                               
                                                 
                         # the person is static or moves in the same cell (cells start from 1!)                                              
-                        if cc==dc: e_tmp[index_pol,cc-1,OT[case]]+=conc[pol][h][cc-1]*(time*IO[l1*index_pol+l2+j]+wait*IO[p*index_pol]); e_tmp[-1,cc-1,OT[case]]+=time+wait                                                                                   
+                        if cc==dc: 
+                           e_tmp[index_pol,cc-1,OT[case]]+=conc[pol][h][cc-1]*(time*IO[l1*index_pol+l2+j]+wait*IO[p*index_pol])
+                           if index_pol==0: 
+                              e_tmp[-1,cc-1,OT[case]]+=time+wait                                                                                   
+
                         else: #the person is travelling in a different cell so we have a path ('Car':21,'Bus':22,'RER':23,'Metro':24,'tram':25,'Foot':31,'Bicycle':32,'Bike':33)
 						                               
                            try: sc=int(trv[k][h][a][0]) # the first cell in the list is the starting cell
                            except: trv[k][h][a]=trv[k][h-1][-1]; sc=int(trv[k][h][a][0]) # this cover the rare cases where travelling spans across 3 hours and the last hour is left blank to passing cells.
                               
-                           tim_cell=time/float(len(trv[k][h][a])); # i assume equal time spend in each cell
+                           if index_pol==0:
+                              tim_cell=time/float(len(trv[k][h][a])) # i assume equal time spend in each cell
                                                            
                            # with PT i add the exposure of the waiting time, the corresponding conc is that of the starting cell (waiting time goes to travelling)
-                           if case in PT: e_tmp[index_pol,sc-1,5]+=wait*conc[pol][h][sc-1]*IO[p*index_pol]; e_tmp[-1,sc-1,5]+=wait                                              
+                           if case in PT: 
+                              e_tmp[index_pol,sc-1,5]+=wait*conc[pol][h][sc-1]*IO[p*index_pol]
+                              if index_pol==0:
+                                 e_tmp[-1,sc-1,5]+=wait                                              
+
                            elif case==21 and index_pol==1: tunnel_p=[0.2]; tun=selection(tunnel_p,0) # i assume a 20% possibility to use a tunnel (arbitrary selection)
                                                                                  
                            for traj_cell in trv[k][h][a]: # cells from 1!
@@ -344,7 +353,10 @@ def calc_exp(input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,
                                   # for PM2.5 an IO ratio of 3 is based on an AP study (Fig. 51 average of 4 tunnels) but they measured number of particles not mass. I use 2.
                                   if traj_cell in tunnels and tun==0: IO_final=IO_final*2.
                                                               
-                               e_tmp[index_pol,int(traj_cell)-1,OT[case]]+=tim_cell*conc[pol][h][int(traj_cell)-1]*IO_final; e_tmp[-1,int(traj_cell)-1,OT[case]]+=tim_cell
+                               e_tmp[index_pol,int(traj_cell)-1,OT[case]]+=tim_cell*conc[pol][h][int(traj_cell)-1]*IO_final
+ 
+                               if index_pol==0:
+                                  e_tmp[-1,int(traj_cell)-1,OT[case]]+=tim_cell
                                                 
             for c in [i for i in vc[w][k] if i in idf_cells and any(v>0. for v in e_tmp[1,i-1])]:
                 exp[c][k]=[[0. for _ in range(6)] for _ in range(3)] # O3,PM2.5,time--> 6 exposure modes
