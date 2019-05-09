@@ -69,7 +69,7 @@ def exposure(conc_dir,out_dir,samp_dir,dom,period_exp,procc,idf_cells,building_s
                 
                     # put[..] is time spend, curr_cell, dest_cell, IO_case, transport IO, curr_loc, dest_loc, motive                                                         
                     put[0],put[1],put[2],put[3],read_IO,put[5],put[6],put[7]=tm[k][h][a].split(','); put[8]=len(tm[k][h]) # put[8] is the max acts per hour
-                    if put[3] in [1,4,6,7]: BT=build_type[put[3]]; ageB=pp[k][ageB_type[BT]]-1; put[9]=BT; put[10]=ageB
+                    if int(put[3]) in [1,4,6,7]: BT=build_type[int(put[3])]; ageB=pp[k][ageB_type[BT]]-1; put[9]=BT; put[10]=ageB
                                 
                     for indx,i in enumerate([0,1,2,3,5,8,9,10]): input[w,k,h,a,indx]=put[i]     
                     for indx,i in enumerate(map(float,read_IO.split('/'))): input[w,k,h,a,8+indx]=i # put the I/O ratios for transport
