@@ -125,22 +125,12 @@ def get_speeds(roads,grid_polyg,dom):
     return speeds2grid
     
 def change_weekend_statistics(data_diaries):
+    import cPickle
 
-    changes_nb=[0.7,0.6,0.72]; changes_motive=[0.113,0.2,0.14,1.1,1.73,0.44]; coeff=[0.0047,0.0047,0.007,0.007,0.0094,0.012,0.012,0.035,0.047,0.054,0.07,0.07,0.065,0.087,0.091,0.088,0.098,0.07,0.065,0.044,0.023,0.014,0.012,0.0102]    
+    data_diaries=cPickle.load(open('data/diaries_input_BASE_weekend.dat','r'))
+
     changes_dis=[[1. for i in xrange(8)],[1. for i in xrange(8)],[1.2 for i in xrange(8)],[1.3 for i in xrange(8)],[1. for i in xrange(8)]]
         
-    # changes in total movements for the weekend, this is based on the total number of movements per category, it is not hourly distributed
-    # EGT, December 2006: Les deplacements de fin de semaine, page 5 (2001 data)    
-    for new_act in xrange(2):  # new_act is actives, in-actives, students
-        tmp=0.; coeff1=[]
-        for h in xrange(24): tmp+=data_diaries['Nb'][new_act][h]; coeff1.append(coeff[h]); coeff1.append(coeff[h])
-        for h in xrange(24): data_diaries['Nb'][new_act][h]=round(tmp*coeff[h]*changes_nb[new_act],1) # i redistribute within the day based on the plot of page 8 in EGT janvier 2013
-
-    # changes in movements per hour and motive for the weekend, EGT, December 2006: Les deplacements de fin de semaine (2001 data)
-    for m in xrange(6):
-        tmp=0.; tmp=sum(data_diaries['obs_mot'][m][h] for h in xrange(24))            
-        for h in xrange(24): data_diaries['obs_mot'][m][h]=round(tmp*coeff1[h]*changes_motive[m],1)
-            
     # the reductions comes from the EGT, December 2006, page 11 (2001 data) and they correspond to changes in the average time not the distance.
     # the average time actually changes significantly only for foot and bicycles not for the others. I assume that the increase in time is due to increase of the distance which is not entirely true
     for t in xrange(5): # motives are: Work,Proff,School,Market,Fun,Personal
@@ -171,14 +161,14 @@ def diary(data_diaries,pp,communes,per_act_pop,mot_pool,stops,weekend,flux_deps,
     mot={'at_Home':[1,60],'Work':[6,61],'Prof':[6,62],'Personal':[4,63],'Market':[0,64],'Fun':[0,65],'School':[7,66],'Car':[21,21],'Bus':[22,22],'RER':[23,23],'Metro':[24,24],'tram':[25,25],'Foot':[31,31],'Bicycle':[32,32],'Bike':[33,33]}
     age_groups=[0,15,25,35,45,55,65,75,150]; wr_trv_traj=[[[] for h in xrange(24)] for k in xrange(nb)]; time_curr_dest=[[[' '] for _ in xrange(24)] for _ in xrange(nb)]
     ind=[[[0 for _ in xrange(7)] for _ in xrange(24)] for _ in xrange(nb)]; make_video=[]; valid_cells=[[] for _ in xrange(nb)]; stk_str=['','_STATIC']
-    mv_per_mot=[sum(data_diaries['Nb_mot'][m][h] for m in xrange(6)) for h in range(24)]
+    mv_per_mot=[sum(data_diaries['obs_mot'][m][h] for m in xrange(6)) for h in range(24)]
     
     def get_indents(hr):              
         if hr<=9: o=1; o1=2; o2=10; o3=15
         else: o=0; o1=0; o2=12; o3=17    
         return o,o1,o2,o3
          
-    def get_mot_per(hr,tot): mot_p_start=[data_diaries['Nb_mot'][m][hr]/tot for m in xrange(6)]; return mot_p_start               
+    def get_mot_per(hr,tot): mot_p_start=[data_diaries['obs_mot'][m][hr]/tot for m in xrange(6)]; return mot_p_start               
     
     for h in xrange(24):
                 
@@ -257,12 +247,21 @@ def diary(data_diaries,pp,communes,per_act_pop,mot_pool,stops,weekend,flux_deps,
                   # based on the above i want to know how much time is needed to perform a movement and the time spend on that activity
                   crs1,crs2=corresp[cc][k_r],corresp[dest_com][k_r]; time_travel,passed,traj=travel_time(deps,data_diaries,trans,dist_travel,dest_com,prev_tr_tm,cc,speeds2grid,crs1,crs2,grid_polyg,dx,dy)   
                   
-                  if motive==7: tmACT_spend=0 # motive=7 means the person goes back home to finish the day                                        
-                  elif activity==0 and motive==2: id_selection=selection(tmp1,0); tmACT_spend=temp[id_selection] # for 0-3 time spend in child care (BUDGET-ESPACE-TEMPS-ACTIVITES DES ENFANTS: LIEUX DE LOISIRS ET DE GARDE)
+                  if motive==7: 
+
+                     tmACT_spend=0 # motive=7 means the person goes back home to finish the day                                        
+
+                  elif activity==0 and motive==2: 
+
+                     id_selection=selection(tmp1,0); tmACT_spend=temp[id_selection] # for 0-3 time spend in child care (BUDGET-ESPACE-TEMPS-ACTIVITES DES ENFANTS: LIEUX DE LOISIRS ET DE GARDE)
+
                   else: 
+
                      indx=deps.index(int(home_dep)); tmACT_spend=int(round(data_diaries['time_act'][motive][indx],0)) # i take the time from the excel input file
-                     if motive==0 and int(pp[k][4])==2: tmACT_spend=int(np.rint(tmACT_spend/2.)) # if the person has a part-time contract then the person works half hours.                  
-          
+
+
+                  if motive==0 and int(pp[k][4])==2: tmACT_spend=int(np.rint(tmACT_spend/2.)) # if the person has a part-time contract then the person works half hours.                  
+                  if motive==0: tmACT_spend+=2*60.         
                   tm_tot=prev_tr_tm+time_travel+tmACT_spend  # to ensure that an activity will not stop at e.g. 20:00, it helps with the writing
                   if Decimal(float((tm_tot))/60.)._isinteger() or Decimal(float((tm_tot))/59.)._isinteger(): tmACT_spend=max(0,tmACT_spend-5)
                                        
