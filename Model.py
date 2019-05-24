@@ -123,8 +123,15 @@ print '----------------------------------------'; print ''
 if allow_steps_dia==0: print 'diaries not requested...'; plt_stats=0; ind_wday=dict(); ind_wend=dict()
 else:
 
-   print 'generating diaries for your individuals...'; cal_st=0; data_diaries=read_data.read_diaries(label); stops=network_stops(); nb_individuals=len(pp)
-      
+   print 'generating diaries for your individuals...'; cal_st=0
+
+   inputFile='data/diaries_input_BASE_semaine.dat'
+
+   if not isfile(f): print 'the '+f+' file was not found in the data directory.' ;sys.exit()
+
+   data_diaries=cPickle.load(open(f,'r'))    #read_data.read_diaries(label)
+   f.close()
+   stops=network_stops(); nb_individuals=len(pp)
    # read the coordinates of the grid cells
    try: st=open('domains/'+str(dom)+'/COORDS_'+str(dom)+'.dat','rb'); grid_coords=cPickle.load(st); st.close()
    except: 
