@@ -130,7 +130,6 @@ else:
    if not isfile(inputFile): print 'the '+inputFile+' file was not found in the data directory.' ;sys.exit()
 
    data_diaries=cPickle.load(open(inputFile,'r'))    #read_data.read_diaries(label)
-   inputFile.close()
    stops=network_stops(); nb_individuals=len(pp)
    # read the coordinates of the grid cells
    try: st=open('domains/'+str(dom)+'/COORDS_'+str(dom)+'.dat','rb'); grid_coords=cPickle.load(st); st.close()
