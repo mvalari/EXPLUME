@@ -212,8 +212,8 @@ def diary(data_diaries,pp,communes,per_act_pop,mot_pool,stops,weekend,flux_deps,
                if h>0: cc=int(ind[k][h-1][4]); num_moves=ind[k][h-1][5]; prev_tr_tm=ind[k][h-1][0]+ind[k][h-1][1] # get how many movements were performed so far by that individual
                               
                # check for movement. This is valid for all individuals at h=0 or if the person is at home. In the latter case the person can continue to be at home or move
-               on_the_move,pep_mv,allow_check=check_for_movement(data_diaries,activity,h,per_act_pop,home_dep,ind,pep_mv,allow_check,k,weekend,nb,acts,static)
-                              
+               on_the_move=check_for_movement(data_diaries,activity,h,nb,static)
+               # check_for_movement(data_diaries,activity,h,nb,static)               
                # There are cases in which a person stays at home. The 2nd case is valid REGARDLESS of the movement check:
                # 1) if the person in the previous hour was at home (cs[10]) then it will stay at home
                # 2) the person was at home and we are in hour 23, so we don't initiate a new movement
@@ -238,7 +238,7 @@ def diary(data_diaries,pp,communes,per_act_pop,mot_pool,stops,weekend,flux_deps,
                      if sum_red2<>0.:
                        for i in [j for j in xrange(len(mot_p)) if j in red2]: mot_p[i]+=(mot_p[i]/sum_red2)*sum_red1 # reconstruct the mot_p array
                        motive=selection(mot_p,0)
-                       if motive in [0,2]: mot_pool[k][motive]=1 # Work (motive=0), Proff, School, Market, Fun, Personal (motive=5)                             
+                       #if motive in [0,2]: mot_pool[k][motive]=1 # Work (motive=0), Proff, School, Market, Fun, Personal (motive=5)                             
                      else: motive=7 # if sum_red2=0 it means that this person cannot exercise any activity at this hour; e.g some activities are done and the others are not allowed
                                           
                   # get destination, distance, transport type
@@ -377,8 +377,8 @@ def get_IO_ratio(case,IO_metro,curr_loc,dest_loc): # this is for the transport I
         
     return '/'.join(map(str, IO)) # combines the IOs in a string separated by '/' e.g. 0./0.8/3.2/4.3 (half for ozone, half for PM2.5)
     
-def check_for_movement(data_diaries,activity,h,per_act_pop,home_dep,ind,pep_mv,allow_check,k,weekend,nb_individuals,activities,static):
-    
+def check_for_movement(data_diaries,activity,h,nb_individuals,static):
+    #on_the_move=check_for_movement(data_diaries,activity,h,nb,static)
     trans_str=['Car','Foot','Bicycle','Bike','Bus','Metro','RER','tram']; pep_mv=[0,0,0]; scale=sum(per_act_pop)/nb_individuals; on_the_move=2
     new_act_dic={2:0,3:0,1:1,4:2,0:2}; new_act=new_act_dic[activity] # activity=2,3: actives, activity=1: school/student, activity=4: inactive, activity=0: 0-3 (i use the variation of inactives)
     
@@ -386,19 +386,19 @@ def check_for_movement(data_diaries,activity,h,per_act_pop,home_dep,ind,pep_mv,a
     # when we calculate the possibility of movement in each hour we use the statistics on the number of people on the move in IdF. From these people we have to exclude
     # those that started their move in the previous hour because we want the new movements. To find those that started their movement previously i use the output of the 
     # model in the previous hour and scale it to the total population
-    if allow_check==1: # it will enter here only for one individual in each hour
-    
-       # here i want to calculate the people that moved in the previous hour and they continue to move in the current hour
-       for k in xrange(nb_individuals):  
-           for a in xrange(len(ind[k][h-1])-7): # number of activities performed in the previous hour
-               if any(x in ind[k][h-1][a+7] for x in trans_str): new_act_tmp=new_act_dic[activities[k]]; pep_mv[new_act_tmp]+=1                                   
-       allow_check=0 # we don't want this to happen for every individual   
-    
-    if static<>1: p=max(data_diaries['Nb'][new_act][h]-pep_mv[new_act]*scale,0); perc=min(p/per_act_pop[new_act],0.99); on_the_move=selection([perc],1)        
+     
+    if new_act==0 : totAct=17153.  #Actifs in EGT2010
+    if new_act==1 : totAct=8336.   #NonActif in EGT2010
+    if new_act==2 : totAct=9686.  #Etudiants in EGT2010
+
+    if static<>1: 
+       p=data_diaries['Nb'][new_act][h]
+       perc=p/totAct 
+       on_the_move=selection([perc],1)        
 
     if activity==0 and h in [23,0,1,2,3,4,5,6]: on_the_move=2 # children 0-3 don't move between 23:00 and 7:00
     
-    return on_the_move,pep_mv,allow_check
+    return on_the_move
 
 def get_dest_dist_trans(curr_com,data_diaries,transport_type,dest_in_prof,workplace,communes,home,deps,motive,home_dep,h,mtv,stops,flux_deps,flux_mode_pt):
         
