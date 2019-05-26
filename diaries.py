@@ -379,7 +379,8 @@ def get_IO_ratio(case,IO_metro,curr_loc,dest_loc): # this is for the transport I
     
 def check_for_movement(data_diaries,activity,h,nb_individuals,static):
     #on_the_move=check_for_movement(data_diaries,activity,h,nb,static)
-    trans_str=['Car','Foot','Bicycle','Bike','Bus','Metro','RER','tram']; pep_mv=[0,0,0]; scale=sum(per_act_pop)/nb_individuals; on_the_move=2
+    trans_str=['Car','Foot','Bicycle','Bike','Bus','Metro','RER','tram']   #; pep_mv=[0,0,0]; scale=sum(per_act_pop)/nb_individuals; 
+    on_the_move=2
     new_act_dic={2:0,3:0,1:1,4:2,0:2}; new_act=new_act_dic[activity] # activity=2,3: actives, activity=1: school/student, activity=4: inactive, activity=0: 0-3 (i use the variation of inactives)
     
     # we seek whereas this active, inactive, pupil/student will be on the move or not. We have each hour the number of journeys for the 3 categories. 
@@ -387,9 +388,9 @@ def check_for_movement(data_diaries,activity,h,nb_individuals,static):
     # those that started their move in the previous hour because we want the new movements. To find those that started their movement previously i use the output of the 
     # model in the previous hour and scale it to the total population
      
-    if new_act==0 : totAct=17153.  #Actifs in EGT2010
-    if new_act==1 : totAct=8336.   #NonActif in EGT2010
-    if new_act==2 : totAct=9686.  #Etudiants in EGT2010
+    if new_act==0 : totAct= 35175  #17153.  #Actifs in EGT2010
+    if new_act==1 : totAct= 35175  #8336.   #NonActif in EGT2010
+    if new_act==2 : totAct= 35175  #9686.  #Etudiants in EGT2010
 
     if static<>1: 
        p=data_diaries['Nb'][new_act][h]
