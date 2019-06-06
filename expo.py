@@ -77,7 +77,7 @@ def exposure(conc_dir,out_dir,samp_dir,dom,period_exp,procc,idf_cells,building_s
     if chimere_exp==1: input[:,:,:,:,8:]=1. # IO ratios are set to 1 for buildings and transport
         
     # calculate exposure in parallel mode
-    for indx,dates in enumerate(dt_procc): threads.append(prll(target=calc_exp,args=[input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,paris_cells,idf_cells,indx,IO_seas]))      
+    for indx,dates in enumerate(dt_procc): threads.append(prll(target=calc_exp,args=[input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,paris_cells,idf_cells,indx,IO_seas,chimere_exp]))      
     for thread in threads: thread.start()
     for thread in threads: thread.join()
         
@@ -273,7 +273,7 @@ def find_idf_cells(grid_polyg,dom):
         
     of=open('domains/'+dom+'/idf_cells.dat','wb'); cPickle.dump(idf_cells,of,-1); of.close(); of=open('domains/'+dom+'/deps_cells.dat','wb'); cPickle.dump(deps_cells,of,-1); of.close()
         
-def calc_exp(input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,paris_cells,idf_cells,indx_chunk,IO_seas):
+def calc_exp(input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,paris_cells,idf_cells,indx_chunk,IO_seas,chimere_exp):
         
     # i export a series of categories. each category goes to a specific element of the last dimension of e_tmp which is controlled by the dictionary OT below:
     # INDOOR--> home: case1, work/proff/school: case6/case6/case7, market/recreation/personal: case4
@@ -309,7 +309,13 @@ def calc_exp(input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,
                     
                     # case1=home; case4=market/recreation/personal indoors; case6=work,professional; case7=school                      
                     if case in [1,4,6,7]:                                                                                                                                                          
-                       for index_pol in range(2): id=selection(IO_seas[curr_dep][index_pol,s,BT,ageB].tolist(),0); IO.append((float(id)*0.05+0.025))
+                       for index_pol in range(2):
+                           if chimere_exp >0 :
+                              IO.append(1.)
+                           else:
+ 
+                              id=selection(IO_seas[curr_dep][index_pol,s,BT,ageB].tolist(),0)
+                              IO.append((float(id)*0.05+0.025))
                                               
                     else: IO=tm[k,h,a,8:12] # transport I/Os
                                                                
@@ -343,8 +349,13 @@ def calc_exp(input,dates,traj,conc_dir,out_dir,dom,nb,vc,dx,dy,tunnels,BP_cells,
                                                                                  
                            for traj_cell in trv[k][h][a]: # cells from 1!
                                IO_final=IO[l1*index_pol+l2]
-                                                              
-                               if case==21 and index_pol==1:
+                               
+                               if chimere_exp > 0:
+                                  
+                                  IO_final=1.
+ 
+                               else :                             
+                                if case==21 and index_pol==1:
                                   j=0
                                   if traj_cell in BP_cells: j=2 # the cell is in the BP
                                   elif traj_cell in paris_cells: j=1 # the cell is inside Paris
