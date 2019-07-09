@@ -382,7 +382,8 @@ def check_for_movement(data_diaries,activity,h,nb_individuals,static):
     trans_str=['Car','Foot','Bicycle','Bike','Bus','Metro','RER','tram']   #; pep_mv=[0,0,0]; scale=sum(per_act_pop)/nb_individuals; 
     on_the_move=2
     new_act_dic={2:0,3:0,1:1,4:2,0:2}; new_act=new_act_dic[activity] # activity=2,3: actives, activity=1: school/student, activity=4: inactive, activity=0: 0-3 (i use the variation of inactives)
-    
+    #Mval I think there is a bug here: students in new activity are in 2 not 1
+    new_act_dic={2:0,3:0,1:12,4:1,0:1}; new_act=new_act_dic[activity] 
     # we seek whereas this active, inactive, pupil/student will be on the move or not. We have each hour the number of journeys for the 3 categories. 
     # when we calculate the possibility of movement in each hour we use the statistics on the number of people on the move in IdF. From these people we have to exclude
     # those that started their move in the previous hour because we want the new movements. To find those that started their movement previously i use the output of the 
