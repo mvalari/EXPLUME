@@ -1,0 +1,63 @@
+# this is the exposure model definition file
+#-------------------------------------------
+
+# label defines the scenario selected for the diaries. it must be integrated in the diaries_input.xls file as: e.g. label='TEST' then diaries_input_TEST.xls.
+# the chim_label is related to the chimere_output. based on this the path to concentrations to CHIMERE is created
+# run_label defined the label of the simulation used e.g., to the create the output and plotting directories
+label='BASE'
+chim_label='IDF2'
+run_label='FINAL_OUTDOORS'
+#'TEST'
+
+# this parameter defines the domain of the simulated exposure. it corresponds to the CHIMERE output simulation. In the directory 'domain'
+# all the files relevant to dom are saved. These include the concentration binary files that are read from the netcdf CHIMERE output.
+dom='IDF2'
+
+# this is to estimate exposure based solely in CHIMERE output. according to this scenario people do not move and receive always outdoor concentrations
+chimere_exp=1
+
+# this is to estimate exposure based on a static population.
+static=1
+
+# number of processors to use for the exposure module
+procc=15
+
+# if the user needs to export images of trajectories of individuals found inside the diaries. 
+traj_images=0
+
+# based on this date the age of the house will be allocated in the 5 groups relevant for IO calculation
+building_stock=2008
+conc_period=2008
+
+# allows certain processors to be activated: 1) Personal profiles 2) diaries 3) CHIMERE concentration files 4) exposure
+allow_steps_prf=0
+allow_steps_dia=0
+allow_steps_con=0
+allow_steps_exp=1
+
+# writes in ASCII files the diaries for each individual in the sample. files are saved in 'samples/ind../diaries' 
+write_asc_dia=0
+
+# path to CHIMERE netcdf output files and the directory to place the output
+path_to_conc='/data/PLT8/pub/vmyrto/CHIMERE_OUT/IDF2/fromIRENE'
+path_for_output='/data/PLT8/pub/vmyrto/EXPO_OUT/'
+path_to_plots='/data/PLT8/pub/vmyrto/EXPO_OUT/plots/'
+
+# calculate and print in screen statistics of the model output relevant for diaries (calc_stats_dia) or exposure (calc_stats_exp)
+calc_stats_dia=0
+calc_stats_exp=0
+
+# activate the plotting post-processor
+plot_stats_exp=0
+
+# if the user needs to calculate exposure for a certain period within the one defined by the concentration files available. dates are given as yyyy-mm-dd
+exp_start_date='2017-01-01'
+#'1991-01-01'
+exp_end_date='2017-12-18'
+#'1991-01-31'
+
+# if the user needs to calculate average statistics and plots for a certain period within the one defined by the exposure output files. dates are given as yyyy-mm-dd
+stats_start_date='2017-01-01'
+#'1991-01-01'
+stats_end_date='2017-12-18'
+#'1991-01-31'
